@@ -1,0 +1,479 @@
+#errorCatcher Echo
+#encoding UTF-8
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="WeatherStation">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+<!-- Chartist CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<style>
+.ct-series-a .ct-bar { stroke: blue; stroke-width:40px;}
+</style>
+<title>Weather Station in $station.location</title>
+</head>
+<body>
+<div class="container">
+<h3>$station.location Weather</h3>
+<div class="row justify-content-between">
+<div class="col-md-6">
+<div class="d-none d-lg-block">
+#if $varExists('forecast')
+## NWS default
+#set $forecast_source = 'NWS'
+## But you can change the forecast source in skin.conf
+#if $varExists('Extras.forecast_source')
+#set $forecast_source = $Extras.forecast_source
+#end if
+<p class="text-center">
+#if $forecast.weather_summary($forecast_source).precip
+#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).precip[0] + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256">
+#elif $forecast.weather_summary($forecast_source).obvis
+#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).obvis[0] + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256">
+#else
+#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).clouds + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256">
+#end if
+</p>
+#end if
+</div>
+</div> <!-- end of column -->
+<div class="col-md-6">
+<h5>Current Conditions <small class="text-muted">As of $current.dateTime.format("%I:%M %p")</small></h5>
+<div class="row">
+<div class="col">
+<h1>$current.outTemp</h1>
+<p class="font-weight-bold">
+#if $current.outTemp.degree_F.raw < 40
+Wind Chill: $current.windchill<br />
+#else if $current.outTemp.degree_F.raw > 80
+Heat Index: $current.heatindex<br />
+#end if
+</p>
+</div> <!-- end of column -->
+<div class="col">
+<h1>$current.windSpeed</h1>
+<p class="font-weight-bold">Wind from $current.windDir.ordinal_compass<br />
+Gusts: $current.windGust <br />
+</div> <!-- end of column -->
+</div> <!-- end of row -->
+<div class="row">
+<div class="col">
+<p>Sunrise: $almanac.sunrise<br />
+Sunset: $almanac.sunset<br />
+Moon Phase: $almanac.moon_phase</p>
+</div>
+</div>
+</div>
+</div>
+<table class="table table-striped table-responsive-sm">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Current</th>
+      <th scope="col">High</th>
+      <th scope="col">Low</th>
+      <th scope="col">Avg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Temperature</th>
+      <td>$current.outTemp</td>
+      <td>$day.outTemp.max</td>
+      <td>$day.outTemp.min</td>
+      <td>$day.outTemp.avg</td>
+    </tr>
+      <tr>
+      <th scope="row">Dewpoint</th>
+      <td>$current.dewpoint</td>
+      <td>$day.dewpoint.max</td>
+      <td>$day.dewpoint.min</td>
+      <td>$day.dewpoint.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Humidity</th>
+      <td>$current.outHumidity</td>
+      <td>$day.outHumidity.max</td>
+      <td>$day.outHumidity.min</td>
+      <td>$day.outHumidity.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Barometer</th>
+      <td>$current.barometer
+#if $trend.barometer.raw < 0
+&darr;
+#else if $trend.barometer.raw > 0
+&uarr;
+#end if
+      </td>
+      <td>$day.barometer.max</td>
+      <td>$day.barometer.min</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th scope="row">Rain</th>
+      <td>$current.rainRate</td>
+      <td>$day.rainRate.max</td>
+      <td>--</td>
+      <td>$day.rain.sum (Daily Total)</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind</th>
+      <td>$current.windSpeed</td>
+      <td>$day.windSpeed.max</td>
+      <td>--</td>
+      <td>$day.windSpeed.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind Gust</th>
+      <td>--</td>
+      <td>$day.windGust.max</td>
+      <td>--</td>
+      <td>--</td>
+    </tr>
+#if $day.UV.has_data
+      <tr>
+      <th scope="row">UV</th>
+      <td>$current.UV</td>
+      <td>$day.UV.max</td>
+      <td>$day.UV.min</td>
+      <td>$day.UV.avg</td>
+#end if
+#if $day.ET.has_data and $day.ET.sum.raw > 0.0
+      <tr>
+      <th scope="row">ET</th>
+      <td>$current.ET</td>
+      <td>--</td>
+      <td>--</td>
+#end if
+#if $day.radiation.has_data
+      <tr>
+      <th scope="row">Solar</th>
+      <td>$current.radiation</td>
+      <td>$day.radiation.max</td>
+      <td>$day.radiation.min</td>
+      <td>$day.radiation.avg</td>
+#end if
+  </tbody>
+</table>
+</div>
+<h3 class="text-center">Today</h3>
+<h4 class="text-center">Temperature and Dewpoint</h4>
+<div class="ct-chart ct-double-octave" id="temp"></div>
+<h4 class="text-center">Barometer</h4>
+<div class="ct-chart ct-double-octave" id="barometer"></div>
+<h4 class="text-center">Rain Rate</h4>
+<div class="ct-chart ct-double-octave" id="rainrate"></div>
+<h4 class="text-center">Rain Accumulation</h4>
+<div class="ct-chart ct-double-octave" id="rain"></div>
+<h4 class="text-center">Wind and Gusts</h4>
+<div class="ct-chart ct-double-octave" id="wind"></div>
+<br />
+<br />
+<br />
+
+
+
+</div><!-- End of right column -->
+</div><!-- End of row -->
+    <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="#"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Current</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="week.html">Week</a>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="month" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Month</a>
+            <div class="dropdown-menu" aria-labelledby="month">
+#for $monthYear in $SummaryByMonth
+#set $myhtml = str($monthYear) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$monthYear</a>
+#end for
+            </div>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="year" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Year</a>
+            <div class="dropdown-menu" aria-labelledby="year">
+#for $yr in $SummaryByYear
+#set $myhtml = str($yr) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$yr</a>
+#end for
+            </div>
+          </li>
+#if $varExists('$Extras.nws_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.nws_url">NWS Forecast</a>
+          </li>
+#end if
+#if $varExists('$Extras.wu_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.wu_url">Wunderground</a>
+          </li>
+#end if
+        </ul>
+        <span class="navbar-text">
+#if not $current.outTempBatteryStatus
+<span class="alert alert-danger" role="alert">🔋 Low</span>
+#end if
+        📡 $current.rxCheckPercent <a href="http://www.weewx.com/">Weewx</a> $station.version</span>
+      </div>
+    </nav>
+</div><!-- End of container -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+<script>
+
+new Chartist.Line('#temp', {
+  series: [
+    {
+      name: 'temp',
+      data: [
+#for $record in $day.records
+## This bit of sorcery converts minute to a decimal through
+## Cheetah's set functionality.
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute", y: "$record.outTemp.nolabel("%1f","undefined")"},
+#end for
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dewpoint',
+      data: [
+#for $record in $day.records
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute", y: "$record.dewpoint.nolabel("%1f","undefined")"},
+#end for
+      ]
+    },
+  ]
+}, {
+  showPoint: false,
+  axisX: {
+    type: Chartist.FixedScaleAxis,
+    divisor: 24,
+    low: 0,
+    high: 24,
+  }
+});
+
+new Chartist.Line('#barometer', {
+  series: [
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'barometer',
+      data: [
+#for $record in $day.records
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute", y: "$record.barometer.nolabel("%1f","undefined")"},
+#end for
+      ]
+    },
+  ]
+}, {
+  showPoint: false,
+  axisX: {
+    type: Chartist.FixedScaleAxis,
+    divisor: 24,
+    low: 0,
+    high: 24,
+  }
+});
+
+new Chartist.Line('#rainrate', {
+  series: [
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'rain',
+      data: [
+#for $record in $day.records
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute",y: "$record.rainRate.nolabel("%2f","undefined")"},
+#end for
+      ]
+    },
+  ]
+}, {
+  showPoint: false,
+  axisX: {
+    type: Chartist.FixedScaleAxis,
+    divisor: 24,
+    low: 0,
+    high: 24,
+  }
+});
+
+new Chartist.Bar('#rain', {
+    labels: [
+#for $hour in $day.hours
+"$hour.dateTime.format("%H")",
+#end for
+  ],
+    series: [
+    [
+#for $hour in $day.hours
+$hour.rain.sum.nolabel("%2f","undefined"),
+#end for
+    ],
+  ]
+  },
+  {
+   showPoint: false,
+    });
+
+new Chartist.Line('#wind', {
+  series: [
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'dummy',
+      data: [
+      ]
+    },
+    {
+      name: 'windspeed',
+      data: [
+#for $record in $day.records
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute",y: "$record.windSpeed.nolabel("%1f","undefined")"},
+#end for
+      ]
+    },
+    {
+      name: 'windgust',
+      data: [
+#for $record in $day.records
+#set $floatminute = float($record.dateTime.format("%M")) / 60;
+#set $decimalminute = str($floatminute - int($floatminute))[2:];
+        {x: "$record.dateTime.format("%H").$decimalminute",y: "$record.windGust.nolabel("%1f","undefined")"},
+#end for
+      ]
+    },
+  ]
+}, {
+    series: {
+    'windspeed': {
+     showPoint: false,
+    },
+    'windgust': {
+      showLine: false,
+      showPoint: true,
+    },
+    },
+  axisX: {
+    type: Chartist.FixedScaleAxis,
+    divisor: 24,
+    low: 0,
+    high: 24,
+  }
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+#errorCatcher Echo
+#encoding UTF-8
+#set $YM="%Y %m"
+#set $D="  %d"
+#set $M=" %b"
+#set $NODAY=" N/A"
+#set $Temp="%6.1f"
+#set $Wind="%6.1f"
+#set $Dir="%6.0f"
+#set $Count="%6d"
+#set $NONE="   N/A"
+#if $unit.unit_type_dict.group_temperature == "degree_F"
+#set $Hot     =(90.0,"degree_F")
+#set $Cold    =(32.0,"degree_F")
+#set $VeryCold=(0.0, "degree_F")
+#else
+#set $Hot     =(30.0,"degree_C")
+#set $Cold    =(0.0,"degree_C")
+#set $VeryCold=(-20.0,"degree_C")
+#end if
+#if $unit.unit_type_dict.group_rain == "inch"
+#set $Trace    =(0.01,"inch")
+#set $SomeRain =(0.1, "inch")
+#set $Soak     =(1.0, "inch")
+#set $Rain="%6.2f"
+#elif $unit.unit_type_dict.group_rain == "mm"
+#set $Trace    =(.3,  "mm")
+#set $SomeRain =(3,   "mm")
+#set $Soak     =(30.0,"mm")
+#set $Rain="%6.1f"
+#else
+#set $Trace    =(.03,"cm")
+#set $SomeRain =(.3, "cm")
+#set $Soak     =(3.0,"cm")
+#set $Rain="%6.2f"
+#end if
+#def ShowInt($T)
+$("%6d" % $T[0])#slurp
+#end def
+#def ShowFloat($R)
+$("%6.2f" % $R[0])#slurp
+#end def
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+<title>Yearly Summary for $month_name $year_name</title>
+</head>
+<body>
+<div class="container">
+<h1 class="text-center">Yearly Summary for $year_name</h1>
+
+<h3 class="text-center">Temperature</h3>
+<div class="text-center table-responsive">
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Month</th>
+      <th scope="col">Mean Max</th>
+      <th scope="col">Mean Min</th>
+      <th scope="col">Mean</th>
+      <th scope="col">Heat Deg Days</th>
+      <th scope="col">Cool Deg Days</th>
+      <th scope="col">HI</th>
+      <th scope="col">Day</th>
+      <th scope="col">Low</th>
+      <th scope="col">Day</th>
+      <th scope="col">Max ≥ $ShowInt($Hot)</th>
+      <th scope="col">Max ≤ $ShowInt($Cold)</th>
+      <th scope="col">Min ≤ $ShowInt($Cold)</th>
+      <th scope="col">Min ≤ $ShowInt($VeryCold)</th>
+    </tr>
+  </thead>
+  <tbody>
+#for $month in $year.months
+#if $month.barometer.count.raw
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+      <td>$month.outTemp.meanmax</td>
+      <td>$month.outTemp.meanmin</td>
+      <td>$month.outTemp.avg</td>
+      <td>$month.heatdeg.sum.nolabel($Temp,$NONE)</td>
+      <td>$month.cooldeg.sum.nolabel($Temp,$NONE)</td>
+      <td>$month.outTemp.max</td>
+      <td>$month.outTemp.maxtime.format($D,$NODAY)</td>
+      <td>$month.outTemp.min</td>
+      <td>$month.outTemp.mintime.format($D,$NODAY)</td>
+      <td>$month.outTemp.max_ge($Hot).nolabel($Count,$NONE)</td>
+      <td>$month.outTemp.max_le($Cold).nolabel($Count,$NONE)</td>
+      <td>$month.outTemp.min_le($Cold).nolabel($Count,$NONE)</td>
+      <td>$month.outTemp.min_le($VeryCold).nolabel($Count,$NONE)</td>
+    </tr>
+#else
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+    </tr>
+#end if
+#end for
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">$year.outTemp.meanmax</th>
+      <th scope="col">$year.outTemp.meanmin</th>
+      <th scope="col">$year.outTemp.avg</th>
+      <th scope="col">$year.heatdeg.sum.nolabel($Temp,$NONE)</th>
+      <th scope="col">$year.cooldeg.sum.nolabel($Temp,$NONE)</th>
+      <th scope="col">$year.outTemp.max</th>
+      <th scope="col">$year.outTemp.maxtime.format("%b")</th>
+      <th scope="col">$year.outTemp.min</th>
+      <th scope="col">$year.outTemp.mintime.format("%b")</th>
+      <th scope="col">$year.outTemp.max_ge($Hot).nolabel($Count,$NONE)</th>
+      <th scope="col">$year.outTemp.max_le($Cold).nolabel($Count,$NONE)</th>
+      <th scope="col">$year.outTemp.min_le($Cold).nolabel($Count,$NONE)</th>
+      <th scope="col">$year.outTemp.min_le($VeryCold).nolabel($Count,$NONE)</th>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+<h3 class="text-center">Precipitation</h3>
+<div class="text-center table-responsive">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Month</th>
+      <th scope="col">Total</th>
+      <th scope="col">Max Obs Day</th>
+      <th scope="col">Date</th>
+      <th scope="col">Days of Rain over $ShowFloat($Trace)</th>
+      <th scope="col">Days of Rain over $ShowFloat($SomeRain)</th>
+      <th scope="col">Days of Rain over $ShowFloat($Soak)</th>
+    </tr>
+  </thead>
+  <tbody>
+#for $month in $year.months
+#if $month.barometer.count.raw
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+      <td>$month.rain.sum</td>
+      <td>$month.rain.maxsum</td>
+      <td>$month.rain.maxsumtime.format($D,$NODAY)</td>
+      <td>$month.rain.sum_ge($Trace).nolabel($Count,$NONE)</td>
+      <td>$month.rain.sum_ge($SomeRain).nolabel($Count,$NONE)</td>
+      <td>$month.rain.sum_ge($Soak).nolabel($Count,$NONE)</td>
+    </tr>
+#else
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+    </tr>
+#end if
+#end for
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">$year.rain.sum</th>
+      <th scope="col">$year.rain.maxsum</th>
+      <th scope="col">$year.rain.maxsumtime.format("%b")</th>
+      <th scope="col">$year.rain.sum_ge($Trace).nolabel($Count,$NONE)</th>
+      <th scope="col">$year.rain.sum_ge($SomeRain).nolabel($Count,$NONE)</th>
+      <th scope="col">$year.rain.sum_ge($Soak).nolabel($Count,$NONE)</th>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+<h3 class="text-center">Wind Speed</h3>
+<div class="text-center table-responsive">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Month</th>
+      <th scope="col">Average</th>
+      <th scope="col">HI</th>
+      <th scope="col">Date</th>
+      <th scope="col">DOM Dir</th>
+    </tr>
+  </thead>
+  <tbody>
+#for $month in $year.months
+#if $month.barometer.count.raw
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+      <td>$month.wind.avg</td>
+      <td>$month.wind.max</td>
+      <td>$month.wind.maxtime.format("%d")</td>
+      <td>$month.wind.vecdir.nolabel($Dir,$NONE)</td>
+    </tr>
+#else
+    <tr>
+      <th scope="row">$month.dateTime.format("%b")</th>
+    </tr>
+#end if
+#end for
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">$year.wind.avg</th>
+      <th scope="col">$year.wind.max</th>
+      <th scope="col">$year.wind.maxtime.format("%b")</th>
+      <th scope="col">$year.wind.vecdir.nolabel($Dir,$NONE)</th>
+    </tr>
+  </tfoot>
+</table>
+</div>
+<br />
+<br />
+<br />
+   <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="#"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Current</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="week.html">Week</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">Month</a>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="year" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Year</a>
+            <div class="dropdown-menu" aria-labelledby="year">
+#for $yr in $SummaryByYear
+#set $myhtml = str($yr) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$yr</a>
+#end for
+            </div>
+          </li>
+#if $varExists('$Extras.nws_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.nws_url">NWS Forecast</a>
+          </li>
+#end if
+#if $varExists('$Extras.wu_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.wu_url">Wunderground</a>
+          </li>
+#end if
+        </ul>
+        <span class="navbar-text"><a href="http://www.weewx.com/">Weewx</a> $station.version</span>
+      </div>
+    </nav>
+</div><!-- End of container -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+</body>
+</html>

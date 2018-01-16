@@ -1,0 +1,155 @@
+#errorCatcher Echo
+#encoding UTF-8
+#set $YM="%Y %m"
+#set $D=" %d"
+#set $M=" %b"
+#set $Time=" %H:%M"
+#set $NODAY=" N/A"
+#set $Temp="%6.1f"
+#set $Wind="%6.1f"
+#set $Dir="%6.0f"
+#set $Count="%6d"
+#set $NONE="   N/A"
+#if $unit.unit_type_dict.group_rain == "mm"
+#set $Rain="%6.1f"
+#else
+#set $Rain="%6.2f"
+#end if
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+<title>Monthly Summary for $month_name $year_name</title>
+</head>
+<body>
+<div class="container">
+
+<h1 class="text-center">Monthly Summary for $month_name $year_name</h1>
+<br \>
+
+<h3 class="text-center">Temperature, Rain, Wind Speed</h3>
+<br \>
+
+<div class="text-center table-responsive">
+<table class="table table-sm table-striped">
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Day</th>
+      <th scope="col">Mean Temp</th>
+      <th scope="col">High</th>
+      <th scope="col">Time</th>
+      <th scope="col">Low</th>
+      <th scope="col">Time</th>
+      <th scope="col">Heat Deg Days</th>
+      <th scope="col">Cool Deg Days</th>
+      <th scope="col">Rain</th>
+      <th scope="col">Avg Wind Speed</th>
+      <th scope="col">High</th>
+      <th scope="col">Time</th>
+      <th scope="col">Dom Dir</th>
+    </tr>
+  </thead>
+  <tbody>
+#for $day in $month.days
+#if $day.barometer.count.raw
+    <tr>
+      <th scope="row">$day.dateTime.format($D)</th>
+      <td>$day.outTemp.avg</td>
+      <td>$day.outTemp.max</td>
+      <td>$day.outTemp.maxtime.format($Time)</td>
+      <td>$day.outTemp.min</td>
+      <td>$day.outTemp.mintime.format($Time)</td>
+      <td>$day.heatdeg.sum.nolabel($Temp,$NONE)</td>
+      <td>$day.cooldeg.sum.nolabel($Temp,$NONE)</td>
+      <td>$day.rain.sum</td>
+      <td>$day.wind.avg</td>
+      <td>$day.wind.max</td>
+      <td>$day.wind.maxtime.format($Time)</td>
+      <td>$day.wind.vecdir</td>
+    </tr>
+#else
+    <tr>
+      <th scope="row">$day.dateTime.format($D)</th>
+    </tr>
+#end if
+#end for
+      <tfoot class="tfoot-light">
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">$month.outTemp.avg</th>
+      <th scope="col">$month.outTemp.max</th>
+      <th scope="col">$month.outTemp.maxtime.format($D)</th>
+      <th scope="col">$month.outTemp.min</th>
+      <th scope="col">$month.outTemp.mintime.format($D)</th>
+      <th scope="col">$month.heatdeg.sum.nolabel($Temp,$NONE)</th>
+      <th scope="col">$month.cooldeg.sum.nolabel($Temp,$NONE)</th>
+      <th scope="col">$month.rain.sum</th>
+      <th scope="col">$month.wind.avg</th>
+      <th scope="col">$month.wind.max</th>
+      <th scope="col">$month.wind.maxtime.format($D)</th>
+      <th scope="col">$month.wind.vecdir</th>
+    </tr>
+  </tfoot>
+  </tbody>
+</table>
+<br />
+<br />
+<br />
+</div>
+   <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="#"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Current</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="week.html">Week</a>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="month" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Month</a>
+            <div class="dropdown-menu" aria-labelledby="month">
+#for $monthYear in $SummaryByMonth
+#set $myhtml = str($monthYear) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$monthYear</a>
+#end for
+            </div>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="year" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Year</a>
+            <div class="dropdown-menu" aria-labelledby="year">
+#for $yr in $SummaryByYear
+#set $myhtml = str($yr) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$yr</a>
+#end for
+            </div>
+          </li>
+#if $varExists('$Extras.nws_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.nws_url">NWS Forecast</a>
+          </li>
+#end if
+#if $varExists('$Extras.wu_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.wu_url">Wunderground</a>
+          </li>
+#end if
+        </ul>
+        <span class="navbar-text"><a href="http://www.weewx.com/">Weewx</a> $station.version</span>
+      </div>
+    </nav>
+</div><!-- End of container -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+</body>
+</html>

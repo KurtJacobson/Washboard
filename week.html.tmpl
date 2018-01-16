@@ -1,0 +1,186 @@
+#errorCatcher Echo
+#encoding UTF-8
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+<!-- Chartist CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<!-- Rain chart should be blue -->
+<style>
+.ct-series-a .ct-bar { stroke: blue; stroke-width:40px;}
+</style>
+<title>Weekly Weather in $station.location</title>
+</head>
+<body>
+<div class="container">
+<h3>$station.location Weather</h3>
+<h4 class="text-center">This week:</h4>
+<br />
+<table class="table table-striped table-responsive-sm">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">High</th>
+      <th scope="col">Low</th>
+      <th scope="col">Avg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Temperature</th>
+      <td>$week.outTemp.max ($week.outTemp.maxtime.format("%a"))</td>
+      <td>$week.outTemp.min ($week.outTemp.mintime.format("%a"))</td>
+      <td>$week.outTemp.avg</td>
+    </tr>
+      <tr>
+      <th scope="row">Dewpoint</th>
+      <td>$week.dewpoint.max ($week.dewpoint.maxtime.format("%a"))</td>
+      <td>$week.dewpoint.min ($week.dewpoint.mintime.format("%a"))</td>
+      <td>$week.dewpoint.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Humidity</th>
+      <td>$week.outHumidity.max ($week.outHumidity.maxtime.format("%a"))</td>
+      <td>$week.outHumidity.min ($week.outHumidity.mintime.format("%a"))</td>
+      <td>$week.outHumidity.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Barometer</th>
+      <td>$week.barometer.max ($week.barometer.maxtime.format("%a"))</td>
+      <td>$week.barometer.min ($week.barometer.mintime.format("%a"))</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th scope="row">Rain (Weekly Total)</th>
+      <td>$week.rain.sum</td>
+      <td>--</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind</th>
+      <td>$week.windSpeed.max</td>
+      <td>--</td>
+      <td>$week.windSpeed.avg</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind Gust</th>
+      <td>$week.windGust.max</td>
+      <td>--</td>
+      <td>--</td>
+    </tr>
+
+#if $week.UV.has_data
+      <tr>
+      <th scope="row">UV</th>
+      <td>$week.UV.max</td>
+      <td>$week.UV.min</td>
+      <td>$week.UV.avg</td>
+#end if
+#if $week.ET.has_data and $week.ET.sum.raw > 0.0
+      <tr>
+      <th scope="row">ET</th>
+      <td>--</td>
+      <td>--</td>
+      <td>--</td>
+#end if
+#if $week.ET.has_data and $week.ET.sum.raw > 0.0
+      <tr>
+      <th scope="row">Solar</th>
+      <td>$week.radiation.max</td>
+      <td>$week.radiation.min</td>
+      <td>$week.radiation.avg</td>
+#end if
+  </tbody>
+</table>
+</div>
+<h4 class="text-center">Rain Accumulation</h4>
+<div class="ct-chart ct-double-octave" id="rain"></div>
+<br />
+<br />
+<br />
+
+
+
+</div><!-- End of right column -->
+</div><!-- End of row -->
+    <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="#"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Current</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="week.html">Week</a>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="month" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Month</a>
+            <div class="dropdown-menu" aria-labelledby="month">
+#for $monthYear in $SummaryByMonth
+#set $myhtml = str($monthYear) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$monthYear</a>
+#end for
+            </div>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="year" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Year</a>
+            <div class="dropdown-menu" aria-labelledby="year">
+#for $yr in $SummaryByYear
+#set $myhtml = str($yr) + str(".html")
+              <a class="dropdown-item" href="$myhtml">$yr</a>
+#end for
+            </div>
+          </li>
+#if $varExists('$Extras.nws_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.nws_url">NWS Forecast</a>
+          </li>
+#end if
+#if $varExists('$Extras.wu_url')
+          <li class="nav-item">
+            <a class="nav-link" href="$Extras.wu_url">Wunderground</a>
+          </li>
+#end if
+        </ul>
+        <span class="navbar-text"><a href="http://www.weewx.com/">Weewx</a> $station.version</span>
+      </div>
+    </nav>
+</div><!-- End of container -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+<script>
+
+
+new Chartist.Bar('#rain', {
+    labels: [
+#for $day in $week.days
+"$day.dateTime.format("%a")",
+#end for
+  ],
+    series: [
+    [
+#for $day in $week.days
+$day.rain.sum.nolabel("%2f",""),
+#end for
+    ],
+  ]
+  },
+  {
+   showPoint: false,
+    });
+
+</script>
+</body>
+</html>
