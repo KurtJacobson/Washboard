@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+<!-- Chartist CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<!-- Rain chart should be blue -->
+<style>
+.ct-series-a .ct-bar { stroke: blue; stroke-width:40px;}
+</style>
+<title>Weekly Weather in Somewhere, VA</title>
+</head>
+<body>
+<div class="container">
+    <div class="alert alert-danger" role="alert">
+  This is only a demo; not live data!
+</div>
+<h3>Somewhere, VA Weather</h3>
+<h4 class="text-center">This week:</h4>
+<br />
+<table class="table table-striped table-responsive-sm">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">High</th>
+      <th scope="col">Low</th>
+      <th scope="col">Avg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Temperature</th>
+      <td>38.3°F (Tue)</td>
+      <td>11.7°F (Mon)</td>
+      <td>22.1°F</td>
+    </tr>
+      <tr>
+      <th scope="row">Dewpoint</th>
+      <td>26.7°F (Tue)</td>
+      <td>-0.2°F (Sun)</td>
+      <td>12.1°F</td>
+    </tr>
+    <tr>
+      <th scope="row">Humidity</th>
+      <td>99% (Tue)</td>
+      <td>33% (Sun)</td>
+      <td>67%</td>
+    </tr>
+    <tr>
+      <th scope="row">Barometer</th>
+      <td>30.760 inHg (Sun)</td>
+      <td>30.402 inHg (Tue)</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th scope="row">Rain (Weekly Total)</th>
+      <td>0.00 in</td>
+      <td>--</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind</th>
+      <td>11 mph</td>
+      <td>--</td>
+      <td>2 mph</td>
+    </tr>
+    <tr>
+      <th scope="row">Wind Gust</th>
+      <td>16 mph</td>
+      <td>--</td>
+      <td>--</td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+<h4 class="text-center">Rain Accumulation</h4>
+<div class="ct-chart ct-double-octave" id="rain"></div>
+<br />
+<br />
+<br />
+
+
+
+</div><!-- End of right column -->
+</div><!-- End of row -->
+    <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" href="#"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Current</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="week.html">Week</a>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="month" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Month</a>
+            <div class="dropdown-menu" aria-labelledby="month">
+              <a class="dropdown-item" href="2018-01.html">2018-01</a>
+            </div>
+          </li>
+          <li class="nav-item dropup">
+            <a class="nav-link dropdown-toggle" href="https://getbootstrap.com" id="year" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Year</a>
+            <div class="dropdown-menu" aria-labelledby="year">
+              <a class="dropdown-item" href="2018.html">2018</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="">NWS Forecast</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="">Wunderground</a>
+          </li>
+        </ul>
+        <span class="navbar-text"><a href="http://www.weewx.com/">Weewx</a> 3.8.0</span>
+      </div>
+    </nav>
+</div><!-- End of container -->
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+<script>
+
+
+new Chartist.Bar('#rain', {
+    labels: [
+"Sun",
+"Mon",
+"Tue",
+"Wed",
+"Thu",
+"Fri",
+"Sat",
+  ],
+    series: [
+    [
+0.000000,
+0.000000,
+0.000000,
+,
+,
+,
+,
+    ],
+  ]
+  },
+  {
+   showPoint: false,
+    });
+
+</script>
+</body>
+</html>
+
