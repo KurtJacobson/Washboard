@@ -29,21 +29,23 @@
 ## NWS default
 #set $forecast_source = 'NWS'
 ## But you can change the forecast source in skin.conf
-#if $varExists('Extras.forecast_source')
 #set $forecast_source = $Extras.forecast_source
+<a href="forecast.html"><p class="text-center">
+## So if there's precip, we display that icon.
+## if not, we see if there is obstructions to visiblity (fog)A
+## if not, we do cloud cover
+#set $summary = $forecast.weather_summary($forecast_source)
+#if $summary.precip
+#set $wxgfx = 'icons/' + $summary.precip[0] + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256" alt='$summary.precip' title='$forecast.label("Weather", $summary.precip[0])'>
+#elif $summary.obvis
+#set $wxgfx = 'icons/' + $summary.obvis[0] + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256" alt='$summary.obvis' title='$forecast.label("Weather", $summary.obvis[0])'>
+#elif $summary.clouds
+#set $wxgfx = 'icons/' + $summary.clouds + '.svg'
+<img src="$wxgfx" class="img-fluid" height="256" width="256" alt='$summary.clouds' title='$forecast.label("Weather", $summary.clouds)'>
 #end if
-<p class="text-center">
-#if $forecast.weather_summary($forecast_source).precip
-#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).precip[0] + '.svg'
-<img src="$wxgfx" class="img-fluid" height="256" width="256">
-#elif $forecast.weather_summary($forecast_source).obvis
-#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).obvis[0] + '.svg'
-<img src="$wxgfx" class="img-fluid" height="256" width="256">
-#else
-#set $wxgfx = 'icons/' + $forecast.weather_summary($forecast_source).clouds + '.svg'
-<img src="$wxgfx" class="img-fluid" height="256" width="256">
-#end if
-</p>
+</p></a>
 #end if
 </div>
 </div> <!-- end of column -->
@@ -59,6 +61,7 @@ Wind Chill: $current.windchill<br />
 Heat Index: $current.heatindex<br />
 #end if
 </p>
+<br />
 </div> <!-- end of column -->
 <div class="col">
 <h1>$current.windSpeed</h1>
@@ -70,7 +73,8 @@ Gusts: $current.windGust <br />
 <div class="col">
 <p>Sunrise: $almanac.sunrise<br />
 Sunset: $almanac.sunset<br />
-Moon Phase: $almanac.moon_phase</p>
+Moon Phase: $almanac.moon_phase<br />
+</p>
 </div>
 </div>
 </div>
@@ -217,9 +221,9 @@ Moon Phase: $almanac.moon_phase</p>
 #end for
             </div>
           </li>
-#if $varExists('$Extras.nws_url')
+#if $varExists('forecast')
           <li class="nav-item">
-            <a class="nav-link" href="$Extras.nws_url">NWS Forecast</a>
+            <a class="nav-link" href="forecast.html">Forecast</a>
           </li>
 #end if
 #if $varExists('$Extras.wu_url')
